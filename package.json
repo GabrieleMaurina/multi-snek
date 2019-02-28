@@ -1,0 +1,33 @@
+{
+  "name": "multi-snek",
+  "version": "1.0.0",
+  "description": "Online multiplayer browser snake game.",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabrieleMaurina/multi-snek.git"
+  },
+  "keywords": [
+    "snake",
+    "online",
+    "browser",
+    "multiplayer",
+    "multi",
+    "snek"
+  ],
+  "author": "Gabriele Maurina",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GabrieleMaurina/multi-snek/issues"
+  },
+  "homepage": "https://github.com/GabrieleMaurina/multi-snek#readme"
+}
