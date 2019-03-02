@@ -1,9 +1,12 @@
+//const SERVER = 'localhost'
+const SERVER = 'multi-snek.herokuapp.com'
+
 const UP = 0
 const DOWN = 1
 const RIGHT = 2
 const LEFT = 3
 
-var socket = io('localhost')
+var socket = io(SERVER)
 
 socket.on('connect', function(){
   console.log('connected')
