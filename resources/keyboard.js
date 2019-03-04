@@ -1,3 +1,8 @@
+const UP = 0
+const DOWN = 1
+const RIGHT = 2
+const LEFT = 3
+
 const ARROWS = [false, false, false, false]
 
 document.onkeydown = (e) => {

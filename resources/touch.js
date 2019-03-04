@@ -1,3 +1,5 @@
+const MIN_TOUCH_MOVEMENT = 50
+
 var xTouchStart = 0
 var yTouchStart = 0
 

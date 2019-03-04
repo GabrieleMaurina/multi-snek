@@ -7,8 +7,6 @@ var context = {}
 const CANVAS = document.getElementById('canvas')
 CANVAS.oncontextmenu = e => e.preventDefault()
 
-
-
 function resize(){
 	CANVAS.width = window.innerWidth
 	CANVAS.height = window.innerHeight
