@@ -1,5 +1,6 @@
 if('ontouchstart' in window){
-  CANVAS.onclick = fullscreen
+  window.onclick = fullscreen
+  window.ontouchstart = fullscreen
 }
 
 function fullscreen(){

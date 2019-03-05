@@ -16,8 +16,8 @@ function resize(){
 	xScale = window.innerWidth / X_SIZE
 	yScale = window.innerHeight / Y_SIZE
 
-	canvas.style.width = window.innerWidth
-	canvas.style.height = window.innerHeight
+	CANVAS.style.width = window.innerWidth
+	CANVAS.style.height = window.innerHeight
 }
 resize()
 
