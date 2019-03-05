@@ -1,4 +1,5 @@
-const SIZE = 100
+const X_SIZE = 160
+const Y_SIZE = 90
 
 var xScale = 1
 var yScale = 1
@@ -12,8 +13,8 @@ function resize(){
 	CANVAS.height = window.innerHeight
 	context = CANVAS.getContext('2d')
 
-	xScale = window.innerWidth / SIZE
-	yScale = window.innerHeight / SIZE
+	xScale = window.innerWidth / X_SIZE
+	yScale = window.innerHeight / Y_SIZE
 
 	canvas.style.width = window.innerWidth
 	canvas.style.height = window.innerHeight
@@ -22,7 +23,7 @@ resize()
 
 function background(){
   context.fillStyle = '#000000'
-  context.fillRect(0, 0, SIZE * xScale, SIZE * yScale)
+  context.fillRect(0, 0, X_SIZE * xScale, Y_SIZE * yScale)
 }
 background()
 

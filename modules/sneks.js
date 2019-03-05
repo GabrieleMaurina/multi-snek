@@ -1,7 +1,8 @@
 const DELAY = 50
 
 const MAX_SNEKS = 8
-const SIZE = 100
+const X_SIZE = 160
+const Y_SIZE = 90
 const MIN_SIZE = 5
 const INCREMENT = 3
 const FOOD = 3
@@ -42,8 +43,8 @@ function spawnSnek(socket){
   let x, y, dir
 
   do{
-    x = Math.floor(Math.random() * SIZE / 2) + Math.floor(SIZE / 4)
-    y = Math.floor(Math.random() * SIZE / 2) + Math.floor(SIZE / 4)
+    x = Math.floor(Math.random() * X_SIZE / 2) + Math.floor(X_SIZE / 4)
+    y = Math.floor(Math.random() * Y_SIZE / 2) + Math.floor(Y_SIZE / 4)
     dir = Math.floor(Math.random() * 4)
   }while(checkSnekSpawn(x, y, dir))
 
@@ -89,8 +90,8 @@ function isFood(x, y, replace = false){
 function getRandomEmptyPoint(){
   let x, y
   do{
-    x = Math.floor(Math.random() * SIZE)
-    y = Math.floor(Math.random() * SIZE)
+    x = Math.floor(Math.random() * X_SIZE)
+    y = Math.floor(Math.random() * Y_SIZE)
   }while(collision(x, y) || isFood())
   return {x:x,y:y}
 }
@@ -107,7 +108,7 @@ function between(i, a, b){
 }
 
 function collision(x, y, grow = false){
-  if(x < 0 || y < 0 || x >= SIZE || y >= SIZE){
+  if(x < 0 || y < 0 || x >= X_SIZE || y >= Y_SIZE){
     return true
   }
   for(let id in sneks){
