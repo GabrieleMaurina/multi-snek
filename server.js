@@ -4,7 +4,8 @@ const EXPRESS = require('express')
 const APP = EXPRESS()
 const SERVER = require('http').createServer(APP)
 const IO = require('socket.io')(SERVER)
-const SNEKS = require(__dirname + '/modules/sneks.js')
+const Sneks = require(__dirname + '/modules/sneks.js').Sneks
+const SNEKS = new Sneks()
 
 console.log('server started')
 

@@ -16,171 +16,175 @@ const OPPOSITE = [1, 0, 3, 2]
 const D_X = [0, 0, 1, -1]
 const D_Y = [-1, 1, 0, 0]
 
-var sneks = {}
-var food = []
-for(let i = 0; i < FOOD; i++) food.push(getRandomEmptyPoint())
+class Sneks{
+  constructor(){
+    this.sneks = {}
+    this.food = []
+    this.colors = []
 
-module.exports = {
-  spawnSnek,
-  setSnekDir,
-  disconnectSnek,
-  update
-}
+    for(let i = 0; i < FOOD; i++) this.food.push(this.getRandomEmptyPoint())
+    this.colors = COLORS.slice(0)
+  }
 
-function spawnSnek(socket){
-  function checkSnekSpawn(x, y, dir){
-    function busy(x, y){
-      return isFood(x, y) || collision(x, y)
+  spawnSnek(socket){
+    let c = Math.floor(Math.random() * COLORS.length)
+    let x, y, dir
+    do{
+      x = Math.floor(Math.random() * X_SIZE / 2) + Math.floor(X_SIZE / 4)
+      y = Math.floor(Math.random() * Y_SIZE / 2) + Math.floor(Y_SIZE / 4)
+      dir = Math.floor(Math.random() * 4)
+    }while(this.checkSnekSpawn(x, y, dir))
+
+    this.sneks[socket.id] = {
+      color:COLORS[c],
+      dir,
+      size: MIN_SIZE,
+      grow: 0,
+      body:[
+        {x, y},
+        {x:x + D_X[OPPOSITE[dir]] * 3, y:y + D_Y[OPPOSITE[dir]] * MIN_SIZE}
+      ]
     }
+    COLORS.splice(c, 1)
+  }
+
+  setSnekDir(socket, dir){
+    dir = Math.max(Math.min(parseInt(dir), 3), 0)
+    if(dir != OPPOSITE[this.getDir(this.sneks[socket.id].body, 0)]){
+      this.sneks[socket.id].dir = dir
+    }
+  }
+
+  disconnectSnek(socket){
+    if(sneks[socket.id]){
+      COLORS.push(sneks[socket.id].color)
+      delete sneks[socket.id]
+    }
+  }
+
+  update(callback){
+    for(let id in this.sneks){
+      let snek = this.sneks[id]
+      let collision = this.moveHead(snek)
+      this.moveTail(snek, collision)
+    }
+    callback(this.getUpdateData())
+    setTimeout(() => this.update(callback), DELAY)
+  }
+
+  checkSnekSpawn(x, y, dir){
     dir = OPPOSITE[dir]
     for(let index = 0; index < MIN_SIZE; index++){
-      if(busy(x + D_X[dir] * index, y + D_Y[dir] * index)) return true
+      if(this.busy(x + D_X[dir] * index, y + D_Y[dir] * index)) return true
     }
     return false
   }
 
-  let c = Math.floor(Math.random() * COLORS.length)
-  let x, y, dir
-
-  do{
-    x = Math.floor(Math.random() * X_SIZE / 2) + Math.floor(X_SIZE / 4)
-    y = Math.floor(Math.random() * Y_SIZE / 2) + Math.floor(Y_SIZE / 4)
-    dir = Math.floor(Math.random() * 4)
-  }while(checkSnekSpawn(x, y, dir))
-
-  sneks[socket.id] = {
-    color:COLORS[c],
-    dir,
-    size: MIN_SIZE,
-    grow: 0,
-    body:[
-      {x, y},
-      {x:x + D_X[OPPOSITE[dir]] * 3, y:y + D_Y[OPPOSITE[dir]] * MIN_SIZE}
-    ]
+  busy(x, y){
+    return this.isFood(x, y) || this.collision(x, y)
   }
-  COLORS.splice(c, 1)
-}
 
-function setSnekDir(socket, dir){
-  dir = Math.max(Math.min(parseInt(dir), 3), 0)
-  if(dir != OPPOSITE[getDir(sneks[socket.id].body, 0)]){
-    sneks[socket.id].dir = dir
-  }
-}
-
-function disconnectSnek(socket){
-  if(sneks[socket.id]){
-    COLORS.push(sneks[socket.id].color)
-    delete sneks[socket.id]
-  }
-}
-
-function isFood(x, y, replace = false){
-  for(let index in food){
-    if(food[index].x == x && food[index].y == y){
-      if(replace){
-        food[index] = getRandomEmptyPoint()
-      }
-      return true
-    }
-  }
-  return false
-}
-
-function getRandomEmptyPoint(){
-  let x, y
-  do{
-    x = Math.floor(Math.random() * X_SIZE)
-    y = Math.floor(Math.random() * Y_SIZE)
-  }while(collision(x, y) || isFood())
-  return {x:x,y:y}
-}
-
-function getDir(body, joint){
-  if(body[joint].x > body[joint + 1].x) return RIGHT
-  else if(body[joint].x < body[joint + 1].x) return LEFT
-  else if(body[joint].y > body[joint + 1].y) return DOWN
-  else return UP
-}
-
-function between(i, a, b){
-  return i >= Math.min(a, b) && i <= Math.max(a, b)
-}
-
-function collision(x, y, grow = false){
-  if(x < 0 || y < 0 || x >= X_SIZE || y >= Y_SIZE){
-    return true
-  }
-  for(let id in sneks){
-    let body = sneks[id].body
-    for(let i = 0; i < body.length - 1; i++){
-      if((x == body[i].x && between(y, body[i].y, body[i + 1].y)) || (y == body[i].y && between(x, body[i].x, body[i + 1].x))){
-        if(grow){
-          sneks[id].grow++
+  isFood(x, y, replace = false){
+    for(let index in this.food){
+      if(this.food[index].x == x && this.food[index].y == y){
+        if(replace){
+          this.food[index] = this.getRandomEmptyPoint()
         }
         return true
       }
     }
+    return false
   }
-  return false
-}
 
-function moveHead(snek){
-  if(!collision(snek.body[0].x + D_X[snek.dir], snek.body[0].y + D_Y[snek.dir])){
-    if(getDir(snek.body, 0) != snek.dir){
-      snek.body.splice(0, 0, {x:snek.body[0].x, y:snek.body[0].y})
+  getRandomEmptyPoint(){
+    let x, y
+    do{
+      x = Math.floor(Math.random() * X_SIZE)
+      y = Math.floor(Math.random() * Y_SIZE)
+    }while(this.collision(x, y) || this.isFood())
+    return {x:x,y:y}
+  }
+
+  getDir(body, joint){
+    if(body[joint].x > body[joint + 1].x) return RIGHT
+    else if(body[joint].x < body[joint + 1].x) return LEFT
+    else if(body[joint].y > body[joint + 1].y) return DOWN
+    else return UP
+  }
+
+  between(i, a, b){
+    return i >= Math.min(a, b) && i <= Math.max(a, b)
+  }
+
+  collision(x, y, grow = false){
+    if(x < 0 || y < 0 || x >= X_SIZE || y >= Y_SIZE){
+      return true
     }
-    snek.body[0].x += D_X[snek.dir]
-    snek.body[0].y += D_Y[snek.dir]
-    if(isFood(snek.body[0].x, snek.body[0].y, true)){
-      snek.grow += INCREMENT
+    for(let id in this.sneks){
+      let body = this.sneks[id].body
+      for(let i = 0; i < body.length - 1; i++){
+        if((x == body[i].x && this.between(y, body[i].y, body[i + 1].y)) || (y == body[i].y && this.between(x, body[i].x, body[i + 1].x))){
+          if(grow){
+            this.sneks[id].grow++
+          }
+          return true
+        }
+      }
     }
     return false
   }
-  return true
-}
 
-function moveTail(snek, collision){
-  if(snek.grow > 0){
-    snek.grow--
-    if(!collision){
-      snek.size++
+  moveHead(snek){
+    if(!this.collision(snek.body[0].x + D_X[snek.dir], snek.body[0].y + D_Y[snek.dir])){
+      if(this.getDir(snek.body, 0) != snek.dir){
+        snek.body.splice(0, 0, {x:snek.body[0].x, y:snek.body[0].y})
+      }
+      snek.body[0].x += D_X[snek.dir]
+      snek.body[0].y += D_Y[snek.dir]
+      if(this.isFood(snek.body[0].x, snek.body[0].y, true)){
+        snek.grow += INCREMENT
+      }
+      return false
+    }
+    return true
+  }
+
+  moveTail(snek, collision){
+    if(snek.grow > 0){
+      snek.grow--
+      if(!collision){
+        snek.size++
+      }
+    }
+    else if(!collision || snek.size > MIN_SIZE){
+      let tail = snek.body.length - 1
+      let tailDir = this.getDir(snek.body, tail - 1)
+      snek.body[tail].x += D_X[tailDir]
+      snek.body[tail].y += D_Y[tailDir]
+      if(snek.body.length > 2 && snek.body[tail].x == snek.body[tail - 1].x && snek.body[tail].y == snek.body[tail - 1].y){
+        snek.body.pop()
+      }
+      if(collision){
+        snek.size--;
+      }
     }
   }
-  else if(!collision || snek.size > MIN_SIZE){
-    let tail = snek.body.length - 1
-    let tailDir = getDir(snek.body, tail - 1)
-    snek.body[tail].x += D_X[tailDir]
-    snek.body[tail].y += D_Y[tailDir]
-    if(snek.body.length > 2 && snek.body[tail].x == snek.body[tail - 1].x && snek.body[tail].y == snek.body[tail - 1].y){
-      snek.body.pop()
+
+  getUpdateData(){
+    let data = {
+      food: this.food,
+      sneks: []
     }
-    if(collision){
-      snek.size--;
+    for(let id in this.sneks){
+      data.sneks.push({
+        color: this.sneks[id].color,
+        body: this.sneks[id].body
+      })
     }
+    return data
   }
 }
 
-function getUpdateData(){
-  let data = {
-    food: food,
-    sneks: []
-  }
-  for(let id in sneks){
-    data.sneks.push({
-      color: sneks[id].color,
-      body: sneks[id].body
-    })
-  }
-  return data
-}
-
-function update(callback){
-  for(let id in sneks){
-    let snek = sneks[id]
-    let collision = moveHead(snek)
-    moveTail(snek, collision)
-  }
-  callback(getUpdateData())
-  setTimeout(() => update(callback), DELAY)
+module.exports = {
+  Sneks
 }
