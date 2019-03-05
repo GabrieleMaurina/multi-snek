@@ -56,9 +56,9 @@ class Sneks{
   }
 
   disconnectSnek(socket){
-    if(sneks[socket.id]){
-      COLORS.push(sneks[socket.id].color)
-      delete sneks[socket.id]
+    if(this.sneks[socket.id]){
+      COLORS.push(this.sneks[socket.id].color)
+      delete this.sneks[socket.id]
     }
   }
 

@@ -7,4 +7,5 @@ function fullscreen(){
   else if (CANVAS.mozRequestFullScreen) CANVAS.mozRequestFullScreen()
   else if (CANVAS.webkitRequestFullscreen) CANVAS.webkitRequestFullscreen()
   else if (CANVAS.msRequestFullscreen) CANVAS.msRequestFullscreen()
+  screen.orientation.lock('landscape')
 }
